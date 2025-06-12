@@ -16,10 +16,10 @@
         },
         {
             "cid":3,
-            "c_name":"rubel",
+            "c_name":"mahi",
             "balance":50000,
             "player_bought":0,
-            "cap_postion": "CF"
+            "cap_postion": "CB"
         },
         {
             "cid":4,
@@ -60,7 +60,7 @@
         { "playerID": 18, "name": "Mahfuz", "position": ["CB"], "status": "unsold" },
         { "playerID": 19, "name": "Sayem", "position": ["MF"], "status": "unsold" },
         { "playerID": 20, "name": "Mahir", "position": ["CB"], "status": "unsold" },
-        { "playerID": 21, "name": "Mahi", "position": ["CB"], "status": "unsold" },
+        { "playerID": 21, "name": "rubel", "position": ["CF","MF"], "status": "unsold" },
         { "playerID": 22, "name": "Tawsif", "position": ["CF"], "status": "unsold" },
         { "playerID": 23, "name": "Farhan", "position": ["CB"], "status": "unsold" },
         { "playerID": 24, "name": "Labib", "position": ["CB"], "status": "unsold" },
