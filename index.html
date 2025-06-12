@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auction Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .section { margin-bottom: 30px; }
+    .captain { margin-bottom: 10px; }
+    .player { margin-bottom: 5px; }
+    .category { margin-top: 20px; }
+    select, button, input[type='number'] { margin-left: 10px; }
+    .team-list { margin-left: 20px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="max-w-[1280px] mx-auto bg-black text-white">
+  <h1 class="text-center">Football Auction Tracker</h1>
+  <h2 class="font-bold text-center mt-20 text-orange-400">Captains</h2>
+  <div class="section text-center " id="captains"></div>
+  <hr>
+  <h2 class="text-center mt-10 text-green-400">Available Players</h2>
+  <div  class="section text-center  flex flex-wrap justify-center p-4  " id="players"></div>
+
+  <script>
+    async function fetchInitialData() {
+      const response = await fetch('dataa.json');
+      return await response.json();
+    }
+
+    async function loadData() {
+      const local = localStorage.getItem("auctionData");
+      if (local) return JSON.parse(local);
+      const fetched = await fetchInitialData();
+      localStorage.setItem("auctionData", JSON.stringify(fetched));
+      return fetched;
+    }
+
+    function saveData(data) {
+      localStorage.setItem("auctionData", JSON.stringify(data));
+    }
+
+    async function resetBudgets() {
+      const data = await loadData();
+      data.captains.forEach(c => {
+        c.balance = 50000;
+        c.player_bought = 0;
+        c.team = [];
+      });
+      data.players.forEach(p => p.status = "unsold");
+      saveData(data);
+      render();
+    }
+
+    async function setInitialBalance() {
+      const balance = prompt("Enter initial balance for all captains:");
+      const parsed = parseInt(balance);
+      if (!isNaN(parsed)) {
+        const data = await loadData();
+        data.captains.forEach(c => c.balance = parsed);
+        saveData(data);
+        render();
+      } else {
+        alert("Invalid amount");
+      }
+    }
+
+    async function buyPlayer(playerID) {
+      const select = document.getElementById(`select-${playerID}`);
+      const input = document.getElementById(`price-${playerID}`);
+      const cid = select.value;
+      const price = parseInt(input.value);
+
+      if (!cid || isNaN(price) || price <= 0) {
+        alert("Please select a captain and enter a valid price.");
+        return;
+      }
+
+      const data = await loadData();
+      const captain = data.captains.find(c => c.cid == cid);
+      const player = data.players.find(p => p.playerID == playerID);
+
+      if (captain.balance < price) {
+        alert("Insufficient balance.");
+        return;
+      }
+
+      if (!captain.team) captain.team = [];
+      captain.team.push({ ...player, price });
+      captain.player_bought++;
+      captain.balance -= price;
+      player.status = "sold";
+
+      saveData(data);
+      render();
+    }
+
+    async function render() {
+      const data = await loadData();
+
+      const capDiv = document.getElementById("captains");
+      capDiv.innerHTML = "" +
+        data.captains.map(c => `
+          <div class="captain">
+            <strong>${c.c_name}</strong> (Position: ${c.cap_postion}) - Balance: ${c.balance}, Players: ${c.player_bought}
+            <div class="team-list border-1">
+              ${c.team?.map(p => `${p.name} (${p.position.join(", ")} for ${p.price})`).join("<br>") || "<i>No players yet</i>"}
+            </div>
+          </div>`).join("");
+
+      const categorized = {};
+      data.players.forEach(p => {
+        if (p.status === "unsold") {
+          p.position.forEach(pos => {
+            if (!categorized[pos]) categorized[pos] = [];
+            categorized[pos].push(p);
+          });
+        }
+      });
+
+      const playerDiv = document.getElementById("players");
+      playerDiv.innerHTML = `` + Object.keys(categorized).map(pos => `
+        <div class="category min-w-[40%] border-2 mr-1">
+          <h3 class="text-left font-bold">${pos}</h3>
+          ${categorized[pos].map(p => `
+            <div class="player">
+              ${p.name} 
+              <input class="border-1 p-1 bg-stone-900" id="price-${p.playerID}" type="number" placeholder="Price" min="1" />
+              <select id="select-${p.playerID}" class="bg-stone-600">
+                <option value="">Select Captain</option>
+                ${data.captains.map(c => `<option value="${c.cid}">${c.c_name}</option>`).join("")}
+              </select>
+              <button class="bg-green-500 px-1 w-[30%] my-2" onclick="buyPlayer(${p.playerID})">Buy</button>
+            </div>`).join("")}
+        </div>`).join("");
+    }
+
+    window.buyPlayer = buyPlayer;
+    window.onload = render;
+    window.setInitialBalance = setInitialBalance;
+  </script>
+
+  <button class="bg-blue-400 text-white p-2" onclick="resetBudgets()">Reset Budgets & Teams</button>
+  <button class="bg-orange-400 text-white p-2" onclick="setInitialBalance()">Set Initial Balance</button>
+</body>
+</html>

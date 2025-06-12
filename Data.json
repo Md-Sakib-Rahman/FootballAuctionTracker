@@ -1,0 +1,70 @@
+{
+    "captains":[
+        {
+            "cid":1,
+            "c_name":"sameer",
+            "balance":50000,
+            "player_bought":0,
+            "cap_postion": "MF"
+        },
+        {
+            "cid":2,
+            "c_name":"rafiul",
+            "balance":50000,
+            "player_bought":0,
+            "cap_postion": "CB"
+        },
+        {
+            "cid":3,
+            "c_name":"rubel",
+            "balance":50000,
+            "player_bought":0,
+            "cap_postion": "CF"
+        },
+        {
+            "cid":4,
+            "c_name":"rumman",
+            "balance":50000,
+            "player_bought":0,
+            "cap_postion":"CF"
+        },
+        {
+
+            "cid":5,
+            "c_name":"Nahid",
+            "balance":50000,
+            "player_bought":0,
+            "cap_postion": "CB"
+        }
+        
+
+    ],
+    "players" : [
+        { "playerID": 1, "name": "Ifaz", "position": ["GK"], "status": "unsold" },
+        { "playerID": 2, "name": "Pretul", "position": ["GK"], "status": "unsold" },
+        { "playerID": 3, "name": "Samin", "position": ["GK"], "status": "unsold" },
+        { "playerID": 4, "name": "F siam", "position": ["GK"], "status": "unsold" },
+        { "playerID": 5, "name": "Patowary", "position": ["GK"], "status": "unsold" },
+        { "playerID": 6, "name": "Sadman", "position": ["CF", "MF"], "status": "unsold" },
+        { "playerID": 7, "name": "Nahid", "position": ["CB", "MF"], "status": "unsold" },
+        { "playerID": 8, "name": "Azmir", "position": ["CB"], "status": "unsold" },
+        { "playerID": 9, "name": "Rafiul", "position": ["CB"], "status": "unsold" },
+        { "playerID": 10, "name": "Abrar", "position": ["CB", "MF"], "status": "unsold" },
+        { "playerID": 11, "name": "Eram", "position": ["CF"], "status": "unsold" },
+        { "playerID": 12, "name": "Akku", "position": ["CF"], "status": "unsold" },
+        { "playerID": 13, "name": "Efty", "position": ["MF"], "status": "unsold" },
+        { "playerID": 14, "name": "Hossain", "position": ["CF"], "status": "unsold" },
+        { "playerID": 15, "name": "Rokib", "position": ["MF"], "status": "unsold" },
+        { "playerID": 16, "name": "Akib", "position": ["MF", "CF"], "status": "unsold" },
+        { "playerID": 17, "name": "Ayman", "position": ["MF", "CF"], "status": "unsold" },
+        { "playerID": 18, "name": "Mahfuz", "position": ["CB"], "status": "unsold" },
+        { "playerID": 19, "name": "Sayem", "position": ["MF"], "status": "unsold" },
+        { "playerID": 20, "name": "Mahir", "position": ["CB"], "status": "unsold" },
+        { "playerID": 21, "name": "Mahi", "position": ["CB"], "status": "unsold" },
+        { "playerID": 22, "name": "Tawsif", "position": ["CF"], "status": "unsold" },
+        { "playerID": 23, "name": "Farhan", "position": ["CB"], "status": "unsold" },
+        { "playerID": 24, "name": "Labib", "position": ["CB"], "status": "unsold" },
+        { "playerID": 25, "name": "Ifti", "position": ["Unknown"], "status": "unsold" }
+            ]
+
+} 
