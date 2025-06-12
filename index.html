@@ -12,18 +12,210 @@
     .category { margin-top: 20px; }
     select, button, input[type='number'] { margin-left: 10px; }
     .team-list { margin-left: 20px; }
+    .blurred {
+    filter: blur(1px);
+    transition: filter 0.3s ease;
+    pointer-events: none; /* Prevent interactions when blurred */
+  }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="max-w-[1280px] mx-auto bg-black text-white">
-  <h1 class="text-center">Football Auction Tracker</h1>
-  <h2 class="font-bold text-center mt-20 text-orange-400">Captains</h2>
-  <div class="section text-center " id="captains"></div>
-  <hr>
-  <h2 class="text-center mt-10 text-green-400">Available Players</h2>
-  <div  class="section text-center  flex flex-wrap justify-center p-4  " id="players"></div>
+<!-- Modal for captain / player change -->
+
+
+
+
+
+<!--  -->
+
+
+
+
+  <div id="mainContent" class="">
+    <!-- Your page content: headers, players, captains, buttons, etc. -->
+     <h1 class="text-center">Football Auction Tracker</h1>
+      <h2 class="font-bold text-center mt-20 text-orange-400">Captains</h2>
+      <button class="bg-yellow-500 text-black px-2 py-1 mt-2" onclick="openCaptainModal()">Edit Captains</button>
+      <div class="section text-center " id="captains"></div>
+      <hr>
+      <h2 class="text-center mt-10 text-green-400">Available Players</h2>
+      <div  class="section text-center  flex flex-wrap justify-center p-4  " id="players"></div>
+  </div>
+
+  <!-- Modal code goes here, outside of #mainContent -->
+
+  <div id="editCaptainsModal" class="fixed inset-0  flex justify-center items-center hidden z-10">
+  <div class="bg-white text-black p-6 rounded w-[80%] max-w-[600px]">
+    <h2 class="text-xl font-bold mb-4">Edit Captains</h2>
+    <div id="captainEditForm" class="space-y-4"></div>
+    <div class="flex justify-end mt-4">
+      <button class="bg-green-600 text-white px-4 py-2 rounded" onclick="saveCaptainEdits()">Update</button>
+      <button class="ml-2 bg-gray-500 text-white px-4 py-2 rounded" onclick="closeCaptainModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="editPlayerModal" class="fixed inset-0  flex justify-center items-center hidden z-10">
+  <div class="bg-white text-black p-6 rounded w-[90%] max-w-[700px] overflow-auto max-h-[80vh]">
+    <h2 class="text-xl font-bold mb-4">Edit Players (<span id="playerModalCategory"></span>)</h2>
+    <div id="playerEditList" class="space-y-2"></div>
+    <hr class="my-4">
+    <h3 class="font-bold">Add New Player</h3>
+    <input id="newPlayerName" placeholder="Name" class="border p-1 mr-2" />
+    <input id="newPlayerPosition" placeholder="Position (comma-separated)" class="border p-1 mr-2" />
+    <button class="bg-green-600 text-white px-4 py-1 rounded" onclick="addPlayerToCategory()">Add</button>
+    <div class="flex justify-end mt-4">
+      <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="savePlayerEdits()">Update</button>
+      <button class="ml-2 bg-gray-500 text-white px-4 py-2 rounded" onclick="closePlayerModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
   <script>
+
+// player modal funtions
+
+
+
+let currentCategory = "";
+
+function openPlayerModal(category) {
+  currentCategory = category;
+  document.getElementById("playerModalCategory").textContent = category;
+
+  loadData().then(data => {
+    const players = data.players.filter(p => p.position.includes(category) && p.status === "unsold");
+    const container = document.getElementById("playerEditList");
+
+    container.innerHTML = players.map(p => `
+      <div>
+        ${p.name} (${p.position.join(", ")})
+        <button class="ml-2 text-red-600" onclick="removeUnsoldPlayer(${p.playerID})">Remove</button>
+      </div>
+    `).join("");
+
+    document.getElementById("editPlayerModal").classList.remove("hidden");
+    document.getElementById("mainContent").classList.add("blurred");
+  });
+}
+
+function closePlayerModal() {
+  document.getElementById("editPlayerModal").classList.add("hidden");
+  document.getElementById("mainContent").classList.remove("blurred");
+}
+
+async function removeUnsoldPlayer(playerID) {
+  const data = await loadData();
+  const index = data.players.findIndex(p => p.playerID === playerID && p.status === "unsold");
+  if (index !== -1) data.players.splice(index, 1);
+  saveData(data);
+  openPlayerModal(currentCategory);
+}
+
+async function addPlayerToCategory() {
+  const name = document.getElementById("newPlayerName").value.trim();
+  const pos = document.getElementById("newPlayerPosition").value.trim().split(",").map(p => p.trim());
+
+  if (!name || pos.length === 0) return alert("Enter valid player name and position.");
+
+  const data = await loadData();
+  const maxID = Math.max(...data.players.map(p => p.playerID));
+  data.players.push({
+    playerID: maxID + 1,
+    name,
+    position: pos,
+    status: "unsold"
+  });
+
+  saveData(data);
+  openPlayerModal(currentCategory);
+}
+
+function savePlayerEdits() {
+  closePlayerModal();
+  render();
+}
+
+
+
+
+// 
+
+
+
+
+//  Captain  modal funtions
+
+function openCaptainModal() {
+  loadData().then(data => {
+    const form = document.getElementById("captainEditForm");
+    form.innerHTML = data.captains.map(c => `
+      <div>
+        <label>Name: <input data-cid="${c.cid}" data-field="c_name" value="${c.c_name}" class="border p-1" /></label>
+        <label class="ml-4">Balance: <input type="number" data-cid="${c.cid}" data-field="balance" value="${c.balance}" class="border p-1" /></label>
+        <label class="ml-4">Position: <input data-cid="${c.cid}" data-field="cap_postion" value="${c.cap_postion}" class="border p-1" /></label>
+      </div>
+    `).join("");
+    document.getElementById("editCaptainsModal").classList.remove("hidden");
+    document.getElementById("mainContent").classList.add("blurred");
+  });
+}
+
+function closeCaptainModal() {
+  document.getElementById("editCaptainsModal").classList.add("hidden");
+  document.getElementById("mainContent").classList.remove("blurred");
+}
+
+async function saveCaptainEdits() {
+  const inputs = document.querySelectorAll("#captainEditForm input");
+  const data = await loadData();
+
+  inputs.forEach(input => {
+    const cid = parseInt(input.getAttribute("data-cid"));
+    const field = input.getAttribute("data-field");
+    const value = field === "balance" ? parseInt(input.value) : input.value;
+
+    const captain = data.captains.find(c => c.cid === cid);
+    if (captain) captain[field] = value;
+  });
+
+  saveData(data);
+  closeCaptainModal();
+  render();
+}
+
+
+
+// 
+    async function removePlayerFromCaptain(captainId, playerID) {
+  const data = await loadData();
+  const captain = data.captains.find(c => c.cid === captainId);
+  const playerIndex = captain.team?.findIndex(p => p.playerID === playerID);
+
+  if (playerIndex === -1) {
+    alert("Player not found in captain's team.");
+    return;
+  }
+
+  const removedPlayer = captain.team.splice(playerIndex, 1)[0];
+  captain.balance += removedPlayer.price;
+  captain.player_bought -= 1;
+
+  const player = data.players.find(p => p.playerID === playerID);
+  player.status = "unsold";
+
+  saveData(data);
+  render();
+}
+window.removePlayerFromCaptain = removePlayerFromCaptain;
+
+
+
+
+
+
+
     async function fetchInitialData() {
       const response = await fetch('Data.json');
       return await response.json();
@@ -105,8 +297,18 @@
           <div class="captain">
             <strong>${c.c_name}</strong> (Position: ${c.cap_postion}) - Balance: ${c.balance}, Players: ${c.player_bought}
             <div class="team-list border-1">
-              ${c.team?.map(p => `${p.name} (${p.position.join(", ")} for ${p.price})`).join("<br>") || "<i>No players yet</i>"}
-            </div>
+            ${c.team?.map(p => `
+              <div>
+                ${p.name} (${p.position.join(", ")} for ${p.price})
+                <button 
+                  onclick="removePlayerFromCaptain(${c.cid}, ${p.playerID})" 
+                  class="bg-red-500 px-2 py-1 text-sm rounded ml-2">
+                  Remove
+                </button>
+              </div>
+            `).join("") || "<i>No players yet</i>"}
+          </div>
+
           </div>`).join("");
 
       const categorized = {};
@@ -121,10 +323,13 @@
 
       const playerDiv = document.getElementById("players");
       playerDiv.innerHTML = `` + Object.keys(categorized).map(pos => `
-        <div class="category min-w-[40%] border-2 mr-1">
-          <h3 class="text-left font-bold">${pos}</h3>
+        <div class="category min-w-[40%] border-2 mr-1 p-2">
+          <h3 class="text-left font-bold">${pos} 
+            
+           <button class="ml-2 mb-2 bg-yellow-500 text-black text-sm px-2 py-1 rounded" onclick="openPlayerModal('${pos}')">Edit</button>  
+          </h3>
           ${categorized[pos].map(p => `
-            <div class="player">
+            <div class="player my-4">
               ${p.name} 
               <input class="border-1 p-1 bg-stone-900" id="price-${p.playerID}" type="number" placeholder="Price" min="1" />
               <select id="select-${p.playerID}" class="bg-stone-600">
